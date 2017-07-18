@@ -33,7 +33,9 @@ function get_values($object)
 {
     $func = (function () { return $this->values; });
 
-    return $func->call($object);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl();
 }
 
 function add_value($object, $key, $value, $valueKey = null)
@@ -73,7 +75,9 @@ function add_value($object, $key, $value, $valueKey = null)
         return $valueKey;
     });
 
-    return $func->call($object, $key, $value, $valueKey);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl($key, $value, $valueKey);
 }
 
 function set_value($object, $key, $value)
@@ -96,7 +100,9 @@ function set_value($object, $key, $value)
         }
     });
 
-    return $func->call($object, $key, $value);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl($key, $value);
 }
 
 function get_value($object, $key, $default = null, $castTo = null)
@@ -113,7 +119,9 @@ function get_value($object, $key, $default = null, $castTo = null)
         return $value;
     });
 
-   return $func->call($object, $key, $default, $castTo);
+    $bcl = $func->bindTo($object, $object);
+
+   return $bcl($key, $default, $castTo);
 }
 
 
@@ -146,7 +154,9 @@ function get_object_changed_values($object)
         return $changedValues;
     });
 
-    return $func->call($object);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl();
 }
 
 /**
@@ -234,7 +244,9 @@ function register_cast_hooks($objectOrClass = null) {
             }
         });
 
-        return $func->call($object, $key, $value);
+        $bcl = $func->bindTo($object, $object);
+
+        return $bcl($key, $value);
     };
 
     $castToHook = function($object, $key, $value, $default, $castTo) {
@@ -244,7 +256,9 @@ function register_cast_hooks($objectOrClass = null) {
             }
         });
 
-        return $func->call($object, $key, $value, $default, $castTo);
+        $bcl = $func->bindTo($object, $object);
+
+        return $bcl($key, $value, $default, $castTo);
     };
 
     if ($objectOrClass) {
@@ -268,5 +282,7 @@ function call()
     /** @var \Closure $closure */
     $closure = array_pop($args);
 
-    return $closure->call($object, ...$args);
+    $bcl = $closure->bindTo($object, $object);
+
+    return $bcl(...$args);
 }

@@ -86,7 +86,9 @@ final class HookStorage
             return $object->hookId;
         });
 
-        return $func->call($object, $object);
+        $bcl = $func->bindTo($object, $object);
+
+        return $bcl($object);
     }
 
     private function __construct()

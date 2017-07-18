@@ -27,7 +27,9 @@ function set_object($context, $key, $object)
         }
     });
 
-    return $func->call($context, $key, $object);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl($key, $object);
 }
 
 /**
@@ -64,7 +66,9 @@ function set_objects($context, $key, $objects)
         }
     });
 
-    return $func->call($context, $key, $objects);
+    $bcl = $func->bindTo($context, $context);
+
+    return $bcl($key, $objects);
 }
 
 /**
@@ -90,7 +94,9 @@ function add_object($context, $key, $object, $objectKey = null)
 
     });
 
-    return $func->call($context, $key, $object, $objectKey);
+    $bcl = $func->bindTo($context, $context);
+
+    return $bcl($key, $object, $objectKey);
 }
 
 /**
@@ -117,7 +123,9 @@ function get_object($object, $key, $classOrClosure = null)
         return $object;
     });
 
-    return $func->call($object, $key, $classOrClosure);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl($key, $classOrClosure);
 }
 
 /**
@@ -142,7 +150,10 @@ function get_objects($context, $key, $classOrClosure = null)
         }
     });
 
-    return $func->call($context, $key, $classOrClosure);
+
+    $bcl = $func->bindTo($context, $context);
+
+    return $bcl($key, $classOrClosure);
 }
 
 function register_object_hooks()
