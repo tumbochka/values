@@ -10,7 +10,7 @@ namespace Makasim\Values;
  */
 function set_values($object, array &$values, $byReference = false)
 {
-    $func = (function (array &$values, $byReference) {
+    $func = function (array &$values, $byReference) {
         if ($byReference) {
             $this->values = &$values;
         } else {
@@ -22,19 +22,23 @@ function set_values($object, array &$values, $byReference = false)
         }
 
         return $this;
-    })->bindTo($object, $object);
+    };
 
-    return $func($values, $byReference);
+    $bcl = $func->bindTo($object, $object);
+
+    return $bcl($values, $byReference);
 }
 
 function get_values($object)
 {
-    return (function () { return $this->values; })->call($object);
+    $func = (function () { return $this->values; });
+
+    return $func->call($object);
 }
 
 function add_value($object, $key, $value, $valueKey = null)
 {
-    return (function($key, $value, $valueKey) {
+    $func = (function($key, $value, $valueKey) {
         foreach (get_registered_hooks($this, 'pre_add_value') as $callback) {
             if (null !== $changedValue = call_user_func($callback, $this, $key, $value)) {
                 $value = $changedValue;
@@ -67,12 +71,14 @@ function add_value($object, $key, $value, $valueKey = null)
         }
 
         return $valueKey;
-    })->call($object, $key, $value, $valueKey);
+    });
+
+    return $func->call($object, $key, $value, $valueKey);
 }
 
 function set_value($object, $key, $value)
 {
-    return (function($key, $value) {
+    $func = (function($key, $value) {
         foreach (get_registered_hooks($this, 'pre_set_value') as $callback) {
             if (null !== $newValue = call_user_func($callback, $this, $key, $value)) {
                 $value = $newValue;
@@ -88,12 +94,14 @@ function set_value($object, $key, $value)
         foreach (get_registered_hooks($this, 'post_set_value') as $callback) {
             call_user_func($callback, $this, $key, $value, $modified);
         }
-    })->call($object, $key, $value);
+    });
+
+    return $func->call($object, $key, $value);
 }
 
 function get_value($object, $key, $default = null, $castTo = null)
 {
-    return (function($key, $default, $castTo) {
+   $func = (function($key, $default, $castTo) {
         $value = array_get($key, $default , $this->values);
 
         foreach (get_registered_hooks($this, 'post_get_value') as $callback) {
@@ -103,7 +111,9 @@ function get_value($object, $key, $default = null, $castTo = null)
         }
 
         return $value;
-    })->call($object, $key, $default, $castTo);
+    });
+
+   return $func->call($object, $key, $default, $castTo);
 }
 
 
@@ -111,7 +121,7 @@ function get_value($object, $key, $default = null, $castTo = null)
 
 function get_object_changed_values($object)
 {
-    return (function () {
+    $func = (function () {
         $changedValues = $this->changedValues;
 
         // hack I know
@@ -134,7 +144,9 @@ function get_object_changed_values($object)
         }
 
         return $changedValues;
-    })->call($object);
+    });
+
+    return $func->call($object);
 }
 
 /**
@@ -216,19 +228,23 @@ function clone_object($object)
 
 function register_cast_hooks($objectOrClass = null) {
     $castValueHook = function($object, $key, $value) {
-        return (function($key, $value) {
+        $func = (function($key, $value) {
             if (method_exists($this, 'castValue')) {
                 return $this->castValue($value);
             }
-        })->call($object, $key, $value);
+        });
+
+        return $func->call($object, $key, $value);
     };
 
     $castToHook = function($object, $key, $value, $default, $castTo) {
-        return (function($key, $value, $default, $castTo) {
+        $func = (function($key, $value, $default, $castTo) {
             if (method_exists($this, 'cast')) {
                 return $castTo ? $this->cast($value, $castTo) : $value;
             }
-        })->call($object, $key, $value, $default, $castTo);
+        });
+
+        return $func->call($object, $key, $value, $default, $castTo);
     };
 
     if ($objectOrClass) {

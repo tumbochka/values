@@ -8,7 +8,7 @@ namespace Makasim\Values;
  */
 function set_object($context, $key, $object)
 {
-    (function($key, $object) use($context) {
+    $func = (function($key, $object) use($context) {
         if ($object) {
             set_value($this, $key, null);
             set_value($this, $key, get_values($object));
@@ -25,7 +25,9 @@ function set_object($context, $key, $object)
             set_value($this, $key, null);
             array_unset($key, $this->objects);
         }
-    })->call($context, $key, $object);
+    });
+
+    return $func->call($context, $key, $object);
 }
 
 /**
@@ -35,7 +37,7 @@ function set_object($context, $key, $object)
  */
 function set_objects($context, $key, $objects)
 {
-    (function($key, $objects) use ($context) {
+    $func = (function($key, $objects) use ($context) {
         if (null !== $objects) {
             array_set($key, [], $this->objects);
 
@@ -60,7 +62,9 @@ function set_objects($context, $key, $objects)
             set_value($this, $key, null);
             array_unset($key, $this->objects);
         }
-    })->call($context, $key, $objects);
+    });
+
+    return $func->call($context, $key, $objects);
 }
 
 /**
@@ -70,7 +74,7 @@ function set_objects($context, $key, $objects)
  */
 function add_object($context, $key, $object, $objectKey = null)
 {
-    (function($key, $object, $objectKey) use ($context) {
+    $func = (function($key, $object, $objectKey) use ($context) {
         $objectValues = get_values($object);
 
         $objectKey = add_value($this, $key, $objectValues, $objectKey);
@@ -84,7 +88,9 @@ function add_object($context, $key, $object, $objectKey = null)
             call_user_func($callback, $object, $context, $key.'.'.$objectKey);
         }
 
-    })->call($context, $key, $object, $objectKey);
+    });
+
+    return $func->call($context, $key, $object, $objectKey);
 }
 
 /**
@@ -96,7 +102,7 @@ function add_object($context, $key, $object, $objectKey = null)
  */
 function get_object($object, $key, $classOrClosure = null)
 {
-    return (function($key, $classOrClosure) {
+    $func =  (function($key, $classOrClosure) {
         if (false == $object = array_get($key, null, $this->objects)) {
             $values =& array_get($key, null, $this->values);
             if (null === $values) {
@@ -109,7 +115,9 @@ function get_object($object, $key, $classOrClosure = null)
         }
 
         return $object;
-    })->call($object, $key, $classOrClosure);
+    });
+
+    return $func->call($object, $key, $classOrClosure);
 }
 
 /**
@@ -120,7 +128,7 @@ function get_object($object, $key, $classOrClosure = null)
  */
 function get_objects($context, $key, $classOrClosure = null)
 {
-    return (function($key, $classOrClosure) {
+    $func = (function($key, $classOrClosure) {
         foreach (array_keys(array_get($key, [], $this->values)) as $valueKey) {
             if (false == $object = array_get("$key.$valueKey", null, $this->objects)) {
                 if ($object = get_object($this, "$key.$valueKey", $classOrClosure)) {
@@ -132,7 +140,9 @@ function get_objects($context, $key, $classOrClosure = null)
 
             yield $valueKey => $object;
         }
-    })->call($context, $key, $classOrClosure);
+    });
+
+    return $func->call($context, $key, $classOrClosure);
 }
 
 function register_object_hooks()

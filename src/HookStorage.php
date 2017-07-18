@@ -70,7 +70,7 @@ final class HookStorage
      */
     public static function getHookId($object)
     {
-        return (function($object) {
+        $func = (function($object) {
             if (false == property_exists($object, 'hookId')) {
                 $object->hookId = null;
             }
@@ -80,7 +80,9 @@ final class HookStorage
             }
 
             return $object->hookId;
-        })->call($object, $object);
+        });
+
+        return $func->call($object, $object);
     }
 
     private function __construct()
