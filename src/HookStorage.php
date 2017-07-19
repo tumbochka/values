@@ -74,7 +74,38 @@ final class HookStorage
      */
     public static function getHookId($object)
     {
-        $func = (function($object) {
+        $func = ClosureHelper::getInstance()->getHookClosure();
+
+        $bcl = $func->bindTo($object, $object);
+
+        return $bcl($object);
+    }
+
+    private function __construct()
+    {
+    }
+}
+
+class ClosureHelper
+{
+    private function __construct()
+    {
+    }
+
+    private static $instance = null;
+
+    public static function getInstance()
+    {
+        if(null === self::$instance) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    public function getHookClosure()
+    {
+        return function($object) {
             if (false == property_exists($object, 'hookId')) {
                 $object->hookId = null;
             }
@@ -84,14 +115,6 @@ final class HookStorage
             }
 
             return $object->hookId;
-        });
-
-        $bcl = $func->bindTo($object, $object);
-
-        return $bcl($object);
-    }
-
-    private function __construct()
-    {
+        };
     }
 }

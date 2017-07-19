@@ -27,7 +27,7 @@ function set_object($context, $key, $object)
         }
     });
 
-    $bcl = $func->bindTo($object, $object);
+    $bcl = $func->bindTo($context, $context);
 
     return $bcl($key, $object);
 }
